@@ -5,7 +5,8 @@
 void imprimirTablero(pieza***);
 int convertir(int,char);
 bool validar_piezas_seleccionadas(int,int,int,int,pieza***,int);
-
+char identificar_pieza(pieza*);
+bool puede_mover(char,int,int,int,int,int,pieza***);
 int main(int argc, char* argv[]){
 	initscr();
 	start_color();
@@ -115,6 +116,7 @@ int main(int argc, char* argv[]){
 						comando[comando_cont] = '\0';
 					}
 				}
+				
 				getch();
 				attroff(COLOR_PAIR(2));
 				int mover_x1,mover_y1, mover_x2, mover_y2;
@@ -126,7 +128,23 @@ int main(int argc, char* argv[]){
 				
 			
 				if(validar_piezas_seleccionadas(mover_x1,mover_y1,mover_x2,mover_y2,tablero,bandera)){
-					
+					char pieza_seleccionada = identificar_pieza(tablero[mover_y1][mover_x1]);
+					if(tablero[mover_y2][mover_x2]==NULL){
+						if(puede_mover(pieza_seleccionada,mover_x1,mover_y1,mover_x2, mover_y2,bandera,tablero)){
+							tablero[mover_y2][mover_x2] = tablero[mover_y1][mover_x1];
+							tablero[mover_y1][mover_x1]= NULL;	
+						}else{
+						    mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
+                                        		getch();
+                                        		if(bandera==1)
+                                                		bandera++;
+                                       			else
+                                                		bandera--;
+
+						}
+					}else{
+						
+					}	
 				}else{
 					mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
 					getch();
@@ -167,6 +185,144 @@ int main(int argc, char* argv[]){
 	
 
 	return 0;
+}
+bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** tablero){
+	bool si_puede=false;
+	if(actual == 'p'){
+		if(jugador == 1){
+			bool primer_turno=false;
+			if(x1==x2){
+				int diferencia = y2-y1;
+				if(y1==1){
+					primer_turno=true;
+				}
+				
+				if(diferencia == 1){
+					si_puede=true;
+				}else{
+					if(diferencia == 2 && primer_turno){
+						si_puede=true;
+					}else{
+						si_puede=false;
+					}
+				}
+				
+			}else{
+				si_puede= false;
+			}
+			
+		}else{
+			bool primer_turno=false;
+                        if(x1==x2){
+                                int diferencia= y1-y2;
+                                if(y1==6){
+                                        primer_turno=true;
+                                }
+
+                                if(diferencia==1){
+                                        si_puede=true;
+                                }else{
+                                        if(diferencia==2 && primer_turno){
+                                                si_puede=true;
+                                        }else{
+                                                si_puede=false;
+                                        }
+                                }
+
+                        }else{
+                                si_puede= false;
+                        }
+
+		
+		}		
+
+	}
+	if(actual=='t'){
+		int cont_piezas=0;
+		if(x1==x2){
+			int diferencia1=y1-y2;
+			int diferencia2=y2-y1;
+				
+			if(diferencia1>0 && diferencia1<8){
+				for(int i=y2-1; i>=y1;i--){
+					if(tablero[i][x1]!=NULL){
+						cont_piezas++;
+					}
+				}
+				if(cont_piezas==0)
+					si_puede=true;
+			}else{
+				if(diferencia2>0 &&diferencia2<8){
+					for(int i=y1+1; i<=y2;i++){
+                                                if(tablero[i][x1]!=NULL){
+                                                	cont_piezas++;
+
+                                                }
+                                        }
+					if(cont_piezas==0)
+ 	                                       si_puede=true;
+
+	
+				}else{
+					si_puede=false;
+				}
+			}
+		}else{
+			if(y1==y2){
+				int diferencia1=x1-x2;
+                                int diferencia2=x2-x1;
+
+                                if(diferencia1>0 && diferencia1<8){
+                                        for(int i=x2-1; i>=x1;i--){
+                                                if(tablero[y1][i]!=NULL){
+                                                         cont_piezas++;
+                                                }
+                                        }
+					if(cont_piezas==0)
+        	                                si_puede=true;
+	
+                                }else{
+                                        if(diferencia2>0 &&diferencia2<8){
+                                                for(int i=x1+1; i<=x2;i++){
+                                                        if(tablero[y1][i]!=NULL){
+                                                                 cont_piezas++;
+                                                        }
+                                                }
+						if(cont_piezas==0)
+		                                        si_puede=true;
+
+                                        }else{
+                                                si_puede=false;
+                                        }
+                                }
+
+			}else{
+				si_puede=false;
+			}
+		}
+	}
+
+	return si_puede;
+}
+char identificar_pieza(pieza* pieza_selec){
+	if(pieza_selec->getTipo() == 't' || pieza_selec->getTipo() == 'T'){
+		return 't';
+	}
+	if(pieza_selec->getTipo() == 'c' || pieza_selec->getTipo() == 'C'){
+        	return 'c';
+        }
+	if(pieza_selec->getTipo() == 'a' || pieza_selec->getTipo() == 'A'){
+        	return 'a';		
+        }
+	if(pieza_selec->getTipo() == 'q' || pieza_selec->getTipo() == 'Q'){
+        	return 'q';
+        }
+	if(pieza_selec->getTipo() == 'k' || pieza_selec->getTipo() == 'K'){
+        	return 'k';
+        }
+	if(pieza_selec->getTipo() == 'p' || pieza_selec->getTipo() == 'P'){
+        	return 'p';
+        }
 }
 bool validar_piezas_seleccionadas(int x1,int y1,int x2,int y2,pieza*** tablero,int turno){
 	bool todo_bien=true;
