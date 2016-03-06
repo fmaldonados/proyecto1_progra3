@@ -171,7 +171,7 @@ int main(int argc, char* argv[]){
                                                 		bandera++;
                                        			else
                                                 		bandera--;
-
+							
 						}
 					}else{
 						if(puede_comer(pieza_seleccionada,mover_x1,mover_y1,mover_x2, mover_y2,bandera,tablero)){
@@ -211,9 +211,16 @@ int main(int argc, char* argv[]){
                                                                         }
                                                                 }
 
-
 							}
 							
+						}else{
+						    mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
+                                                        getch();
+                                                        if(bandera==1)
+                                                                bandera++;
+                                                        else
+                                                                bandera--;
+
 						}
 					}	
 				}else{
@@ -321,7 +328,7 @@ bool puede_comer(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 	bool si_puede=false;
 	if(actual=='p'){
 		if(jugador==1){
-			if(x2==x1+1 && y2==y1+1 || x2==x1-1 && y2==y1+1)
+			if((x2==x1+1 && y2==y1+1) || (x2==x1-1 && y2==y1+1))
 				si_puede=true;
 		}else{
 			if(x1==x2+1 && y1==y2+1 || x1==x2-1 && y1==y2+1)
@@ -348,7 +355,10 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 					si_puede=true;
 				}else{
 					if(diferencia == 2 && primer_turno){
-						si_puede=true;
+						if(tablero[y1+1][x1]==NULL)
+							si_puede=true;
+						else
+							si_puede=false;
 					}else{
 						si_puede=false;
 					}
@@ -370,7 +380,10 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
                                         si_puede=true;
                                 }else{
                                         if(diferencia==2 && primer_turno){
-                                                si_puede=true;
+						if(tablero[y1-1][x1]==NULL)
+                                                	si_puede=true;
+						else
+							si_puede=false;
                                         }else{
                                                 si_puede=false;
                                         }
@@ -675,8 +688,7 @@ void imprimirTablero(pieza*** tablero){
 	int width, height;
 	getmaxyx(curscr,height,width);
 	int cont2=0;
-	mvprintw((height/2-1)-1, (width/3 -1 )+2 ," A    B    C    D    E    F    G    H");
-		
+	mvprintw((height/2-1)-1, (width/3 -1 )+2 ," A    B    C    D    E    F    G    H");	
 	for(int i=0; i< 8;i++){
 		int cont=0;
 		mvprintw((height/2-1)+cont2, (width/3 -1 ) + cont, "%i", i+1);
@@ -709,6 +721,4 @@ void imprimirTablero(pieza*** tablero){
                }
 		cont2 +=2;
 	}
-
 }
-
