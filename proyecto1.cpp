@@ -87,9 +87,9 @@ int main(int argc, char* argv[]){
 				attroff(COLOR_PAIR(2));
 
 				attron(COLOR_PAIR(3));
+				mvprintw(height-1, 0 ,"By: Felix Maldonado ");
 				mvprintw((height/2-1)-6, (width/3 -1 )+2 ,"UTILIZAR SOLO MAYUSCULAS");
 				mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"INGRESE EL COMANDO PARA MOVER: ");
-
 				attroff(COLOR_PAIR(3));
 				attron(COLOR_PAIR(2));
 				char comando[5];
@@ -301,7 +301,107 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 			}
 		}
 	}
-
+	if(actual == 'a'){
+		int diferenciay1=y1-y2;
+                int diferenciay2=y2-y1;
+		int diferenciax1=x1-x2;
+                int diferenciax2=x2-x1;
+		
+		if(diferenciay1>0 && diferenciay1<8){
+			if(diferenciax1>0 && diferenciax1<8){
+				int desplazamientox=x1-1,desplazamientoy=y1-1;
+				si_puede=true;
+				while(desplazamientox!=x2-1 && desplazamientoy!=y2-1){
+					if(tablero[desplazamientoy][desplazamientox]!=NULL){
+						si_puede=false;
+						break;
+					}
+					desplazamientox--;
+					desplazamientoy--;
+				}
+                	}else{
+				if(diferenciax2>0 && diferenciax2<8){
+					int desplazamientox=x2+1,desplazamientoy=y1-1;
+					si_puede=true;
+                                	while(desplazamientox!=x1+1 && desplazamientoy!=y2-1){
+                                         	if(tablero[desplazamientoy][desplazamientox]!=NULL){
+                                                	si_puede=false;
+                                                	break;
+                                        	}
+                                        	desplazamientox++;
+                                        	desplazamientoy--;
+                                	}
+                        	}else{
+					si_puede=false;
+				}
+			}
+		}else{
+			if(diferenciay2>0 && diferenciay2<8){
+				if(diferenciax1>0 && diferenciax1<8){
+					int desplazamientox=x1-1,desplazamientoy=y1+1;
+					si_puede=true;
+                                	while(desplazamientox!=x2-1 && desplazamientoy!=y2+1){
+                                        	if(tablero[desplazamientoy][desplazamientox]!=NULL){
+                                                	si_puede=false;
+                                                	break;
+                                        	}
+                                        	desplazamientox--;
+                                        	desplazamientoy++;
+                                	}
+                        	}else{
+					if(diferenciax2>0 && diferenciax2<8){
+						int desplazamientox=x1+1,desplazamientoy=y1+1;
+						si_puede=true;
+                                		while(desplazamientox!=x2+1 && desplazamientoy!=y2+1){
+                                        		if(tablero[desplazamientoy][desplazamientox]!=NULL){
+                                                		si_puede=false;
+                                        		}
+                                        		desplazamientox++;
+                                        		desplazamientoy++;
+                                		}	
+					}else{
+						si_puede=false;
+					}
+				}
+			}else{
+				si_puede=false;
+			}
+		}
+			
+	}
+	if (actual='c'){
+		if(y2==y1+2 && x2==x1+1){
+			si_puede=true;
+		}
+		if(y2==y1-2 && x2==x1+1){
+                        si_puede=true;
+                }
+		if(y2==y1+2 && x2==x1-1){
+                        si_puede=true;
+                }	
+		if(y2==y1-2 && x2==x1-1){
+                        si_puede=true;
+                }
+		if(y2==y1+1 && x2==x1+2){
+                        si_puede=true;
+                }
+		if(y2==y1+1 && x2==x1-2){
+                        si_puede=true;
+                }
+		if(y2==y1-1 && x2==x1+2){
+                        si_puede=true;
+                }
+		if(y2==y1-1 && x2==x1-2){
+                        si_puede=true;
+                }
+		
+	}
+	if(actual == 'q'){
+	
+	}
+	if(actual == 'k'){
+	
+	}
 	return si_puede;
 }
 char identificar_pieza(pieza* pieza_selec){
