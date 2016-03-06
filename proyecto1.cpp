@@ -7,6 +7,7 @@ int convertir(int,char);
 bool validar_piezas_seleccionadas(int,int,int,int,pieza***,int);
 char identificar_pieza(pieza*);
 bool puede_mover(char,int,int,int,int,int,pieza***);
+bool puede_comer(char,int,int,int,int,int,pieza***);
 int main(int argc, char* argv[]){
 	initscr();
 	start_color();
@@ -75,8 +76,8 @@ int main(int argc, char* argv[]){
         		for(int i=0; i<8;i++)
                 		tablero[6][i]=new pieza('p',2,true);
 
-				bool terminar_juego=false;
-				int bandera=1;
+			bool terminar_juego=false; //inicia el juego
+			int bandera=1;
 			while(!terminar_juego){
 				imprimirTablero(tablero);
 				attron(COLOR_PAIR(1));
@@ -97,7 +98,7 @@ int main(int argc, char* argv[]){
 				bool final_cadena = false;
 				while(comando_cont < 4 && !final_cadena){
 					noecho();
-					char temp;
+					char temp;//recibe un char de la entrada
 					temp = getch();
 					if(temp >= 65 && temp <= 72 && (comando_cont == 0 || comando_cont == 2 )){
 						echo();
@@ -111,7 +112,7 @@ int main(int argc, char* argv[]){
                                         	comando[comando_cont] = temp;
                                         	comando_cont++;
                                 	}
-					if(temp == 10 && comando_cont != 0){
+					if(temp == 10 && comando_cont == 4){
 						final_cadena = true;
 						comando[comando_cont] = '\0';
 					}
@@ -143,7 +144,21 @@ int main(int argc, char* argv[]){
 
 						}
 					}else{
-						
+						if(puede_comer(pieza_seleccionada,mover_x1,mover_y1,mover_x2, mover_y2,bandera,tablero)){
+							if(bandera==1){
+								tablero[mover_y2][mover_x2]->setVive(false);
+								tablero[mover_y2][mover_x2]==NULL;
+								tablero[mover_y2][mover_x2]== tablero[mover_y1][mover_x1];
+								tablero[mover_y1][mover_x1]=NULL;
+							}else{
+								tablero[mover_y2][mover_x2]->setVive(false);
+
+								tablero[mover_y2][mover_x2]==NULL;
+                                                                tablero[mover_y2][mover_x2]== tablero[mover_y1][mover_x1];
+                                                                tablero[mover_y1][mover_x1]=NULL;
+							}
+							
+						}
 					}	
 				}else{
 					mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
@@ -162,6 +177,18 @@ int main(int argc, char* argv[]){
 				
 				clear();
 			}
+				for (int i = 0; i < 8; i++){
+					for (int j = 0; j < 8; j++){
+						delete [] tablero[i][j];
+					}
+				}
+
+				for (int i = 0; i < 8; i++){
+					delete[] tablero[i];
+				}
+
+				delete[] tablero;
+				
 				terminar=true;
 							
 		}else{
@@ -178,6 +205,7 @@ int main(int argc, char* argv[]){
 		}
 		
 	}
+	
 	refresh();	
  	getch();		
 	endwin();
@@ -185,6 +213,22 @@ int main(int argc, char* argv[]){
 	
 
 	return 0;
+}
+bool puede_comer(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** tablero){
+	bool si_puede=false;
+	if(actual=='p'){
+		if(jugador==1){
+			if(x2==x1+1 && y2==y1+1 || x2==x1-1 && y2==y1+1)
+				si_puede=true;
+		}else{
+			if(x1==x2+1 && y1==y2+1 || x1==x2-1 && y1==y2+1)
+                                si_puede=true;
+
+		}
+	}else{
+		si_puede=puede_mover(actual,x1,y1,x2,y2,jugador,tablero) ;
+	}
+	return si_puede;
 }
 bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** tablero){
 	bool si_puede=false;
@@ -244,7 +288,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 			int diferencia2=y2-y1;
 				
 			if(diferencia1>0 && diferencia1<8){
-				for(int i=y2-1; i>=y1;i--){
+				for(int i=y2-1; i>y1;i--){
 					if(tablero[i][x1]!=NULL){
 						cont_piezas++;
 					}
@@ -253,7 +297,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 					si_puede=true;
 			}else{
 				if(diferencia2>0 &&diferencia2<8){
-					for(int i=y1+1; i<=y2;i++){
+					for(int i=y1+1; i<y2;i++){
                                                 if(tablero[i][x1]!=NULL){
                                                 	cont_piezas++;
 
@@ -311,7 +355,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 			if(diferenciax1>0 && diferenciax1<8){
 				int desplazamientox=x1-1,desplazamientoy=y1-1;
 				si_puede=true;
-				while(desplazamientox!=x2-1 && desplazamientoy!=y2-1){
+				while(desplazamientox!=x2 && desplazamientoy!=y2){
 					if(tablero[desplazamientoy][desplazamientox]!=NULL){
 						si_puede=false;
 						break;
@@ -323,7 +367,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 				if(diferenciax2>0 && diferenciax2<8){
 					int desplazamientox=x2+1,desplazamientoy=y1-1;
 					si_puede=true;
-                                	while(desplazamientox!=x1+1 && desplazamientoy!=y2-1){
+                                	while(desplazamientox!=x1 && desplazamientoy!=y2){
                                          	if(tablero[desplazamientoy][desplazamientox]!=NULL){
                                                 	si_puede=false;
                                                 	break;
@@ -340,7 +384,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 				if(diferenciax1>0 && diferenciax1<8){
 					int desplazamientox=x1-1,desplazamientoy=y1+1;
 					si_puede=true;
-                                	while(desplazamientox!=x2-1 && desplazamientoy!=y2+1){
+                                	while(desplazamientox!=x2 && desplazamientoy!=y2){
                                         	if(tablero[desplazamientoy][desplazamientox]!=NULL){
                                                 	si_puede=false;
                                                 	break;
@@ -352,7 +396,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 					if(diferenciax2>0 && diferenciax2<8){
 						int desplazamientox=x1+1,desplazamientoy=y1+1;
 						si_puede=true;
-                                		while(desplazamientox!=x2+1 && desplazamientoy!=y2+1){
+                                		while(desplazamientox!=x2 && desplazamientoy!=y2){
                                         		if(tablero[desplazamientoy][desplazamientox]!=NULL){
                                                 		si_puede=false;
                                         		}
@@ -369,7 +413,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 		}
 			
 	}
-	if (actual='c'){
+	if (actual=='c'){
 		if(y2==y1+2 && x2==x1+1){
 			si_puede=true;
 		}
@@ -397,10 +441,36 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 		
 	}
 	if(actual == 'q'){
-	
+		if(puede_mover('a',x1,y1,x2,y2,jugador,tablero) || puede_mover('t',x1,y1,x2,y2,jugador,tablero)){
+			si_puede=true;
+		}
 	}
 	if(actual == 'k'){
-	
+		if(x2==x1-1 && y2== y1-1){
+			si_puede=true;
+		}
+		if(x2==x1-1 && y2== y1){
+                        si_puede=true;
+                }
+		if(x2==x1-1 && y2== y1+1){
+                        si_puede=true;
+                }
+		if(x2==x1 && y2== y1-1){
+                        si_puede=true;
+                }
+		if(x2==x1 && y2== y1+1){
+                        si_puede=true;
+                }
+		if(x2==x1+1 && y2== y1-1){
+                        si_puede=true;
+                }
+		if(x2==x1+1 && y2== y1){
+                        si_puede=true;
+                }
+		if(x2==x1+1 && y2== y1+1){
+                        si_puede=true;
+                }
+
 	}
 	return si_puede;
 }
