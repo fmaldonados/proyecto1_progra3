@@ -15,7 +15,7 @@ void pieza::setTipo(char tipo){
 }
 
 void pieza::setJugador(int jugador){
-        this -> tipo = jugador;
+        this -> jugador = jugador;
 }
 
 void pieza::setVive(bool vive){

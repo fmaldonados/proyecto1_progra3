@@ -8,11 +8,12 @@ bool validar_piezas_seleccionadas(int,int,int,int,pieza***,int);
 char identificar_pieza(pieza*);
 bool puede_mover(char,int,int,int,int,int,pieza***);
 bool puede_comer(char,int,int,int,int,int,pieza***);
+char graduacion_peon(char[],int);
 int main(int argc, char* argv[]){
 	initscr();
 	start_color();
 	int width, height;
-		
+			
 	pieza*** tablero = new pieza** [8];
 	for (int i = 0; i < 8; i++){
 		tablero[i] = new pieza*[8];
@@ -31,7 +32,7 @@ int main(int argc, char* argv[]){
 
 	getmaxyx(curscr,height,width);
 	int move_this_y_1 = (height/2)-1;
-	mvprintw(move_this_y_1,(width/3) -1,"Bienvenido a al mejor juego de ajedrez");
+	mvprintw(move_this_y_1,(width/3) -1,"Bienvenido al mejor juego de ajedrez del mundo!!!");
 	getch();
 	clear();
 	attron(A_BOLD);
@@ -54,6 +55,8 @@ int main(int argc, char* argv[]){
 		refresh();
 
 		if(opc==49){
+			char comidos_p1[]={'t','c','a','r','\0'},comidos_p2[]={'T','C','A','R','\0'};
+			
 			tablero[0][0]=new pieza('T',1,true);
         		tablero[0][1]=new pieza('C',1,true);
         		tablero[0][2]=new pieza('A',1,true);
@@ -134,6 +137,33 @@ int main(int argc, char* argv[]){
 						if(puede_mover(pieza_seleccionada,mover_x1,mover_y1,mover_x2, mover_y2,bandera,tablero)){
 							tablero[mover_y2][mover_x2] = tablero[mover_y1][mover_x1];
 							tablero[mover_y1][mover_x1]= NULL;	
+							if(bandera==1){
+								if(pieza_seleccionada=='p' && mover_y2==7){
+									char convertir_peon ='\0';
+									while(convertir_peon=='\0'){
+										convertir_peon = graduacion_peon(comidos_p2,bandera);
+										if(convertir_peon!='\0')
+											tablero[mover_y2][mover_x2]->setTipo(convertir_peon);
+										else{
+						 					mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"No valido!");
+											getch();
+										}
+									}
+								}
+							}else{
+								if(pieza_seleccionada=='p' && mover_y2==0){
+									char convertir_peon='\0';
+                                                                        while(convertir_peon=='\0'){
+                                                                                convertir_peon = graduacion_peon(comidos_p1,bandera);
+                                                                                if(convertir_peon!='\0')
+                                                                                        tablero[mover_y2][mover_x2]->setTipo(convertir_peon);
+                                                                                else{
+                                                                                        mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"No valido!");
+											getch();
+										}
+                                                                        }
+								}
+							}
 						}else{
 						    mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
                                         		getch();
@@ -146,16 +176,42 @@ int main(int argc, char* argv[]){
 					}else{
 						if(puede_comer(pieza_seleccionada,mover_x1,mover_y1,mover_x2, mover_y2,bandera,tablero)){
 							if(bandera==1){
-								tablero[mover_y2][mover_x2]->setVive(false);
-								tablero[mover_y2][mover_x2]==NULL;
-								tablero[mover_y2][mover_x2]== tablero[mover_y1][mover_x1];
+								tablero[mover_y2][mover_x2]->setJugador(bandera);
+								tablero[mover_y2][mover_x2]->setTipo(tablero[mover_y1][mover_x1]->getTipo());
 								tablero[mover_y1][mover_x1]=NULL;
+								
+								if(pieza_seleccionada=='p' && mover_y2==7){
+									char convertir_peon='\0';
+                                                                	while(convertir_peon =='\0'){
+                                                                		convertir_peon = graduacion_peon(comidos_p2,bandera);
+                                                                        	if(convertir_peon!='\0')
+                                                                        		tablero[mover_y2][mover_x2]->setTipo(convertir_peon);
+                                                                        	else{
+                                                                                	mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"No valido!");
+											getch();
+										}
+                                                                	}
+								}
 							}else{
-								tablero[mover_y2][mover_x2]->setVive(false);
-
-								tablero[mover_y2][mover_x2]==NULL;
+								tablero[mover_y2][mover_x2]->setJugador(bandera);
+                                                                tablero[mover_y2][mover_x2]->setTipo(tablero[mover_y1][mover_x1]->getTipo());
                                                                 tablero[mover_y2][mover_x2]== tablero[mover_y1][mover_x1];
                                                                 tablero[mover_y1][mover_x1]=NULL;
+								
+								if(pieza_seleccionada =='p' && mover_y2==0){
+                                                                        char convertir_peon='\0';
+                                                                        while(convertir_peon=='\0'){
+                                                                                convertir_peon = graduacion_peon(comidos_p1,bandera);
+                                                                                if(convertir_peon!='\0')
+                                                                                        tablero[mover_y2][mover_x2]->setTipo(convertir_peon);
+                                                                                else{
+                                                                                        mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"No valido!");
+											getch();
+										}
+                                                                        }
+                                                                }
+
+
 							}
 							
 						}
@@ -206,13 +262,60 @@ int main(int argc, char* argv[]){
 		
 	}
 	
-	refresh();	
  	getch();		
 	endwin();
 	
 	
 
 	return 0;
+}
+char graduacion_peon(char piezas_comidas[],int jugador){
+	clear();
+	int width, height;
+        getmaxyx(curscr,height,width);
+	char pieza_revivida = '\0';
+	mvprintw((height/2-1)-1, (width/3 -1 )+2 , piezas_comidas);
+	mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"Ingrese la pieza que desea convertir su peon: ");
+
+	char pieza_seleccionada=getch();
+	if(jugador==1){
+		if(pieza_seleccionada== 'p' || pieza_seleccionada=='P')
+			pieza_revivida= 'P';
+		else
+			if(pieza_seleccionada== 'c'|| pieza_seleccionada=='C')
+                        	pieza_revivida= 'C';
+			else
+				if(pieza_seleccionada== 'a' ||pieza_seleccionada=='A')
+                        		pieza_revivida= 'A';
+				else
+					if(pieza_seleccionada== 'q' ||  pieza_seleccionada=='Q')
+                        			pieza_revivida= 'Q';
+					else
+						if(pieza_seleccionada== 't'||  pieza_seleccionada=='T')
+                        				pieza_revivida= 'T';
+					
+		 
+		
+	}else{
+		if(pieza_seleccionada== 'p'  || pieza_seleccionada=='P')
+                        pieza_revivida= 'p';
+                else
+                        if(pieza_seleccionada== 'C' || pieza_seleccionada=='c')
+                                pieza_revivida= 'c';
+                        else
+                                if(pieza_seleccionada== 'A'|| pieza_seleccionada=='a')
+                                        pieza_revivida= 'a';
+                                else
+                                        if(pieza_seleccionada=='Q' || pieza_seleccionada=='q')
+                                                pieza_revivida= 'q';
+                                        else
+                                                if(pieza_seleccionada=='T' ||pieza_seleccionada=='t')
+                                                        pieza_revivida= 't';
+                                               
+
+
+	}
+	return pieza_revivida;
 }
 bool puede_comer(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** tablero){
 	bool si_puede=false;
@@ -317,7 +420,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
                                 int diferencia2=x2-x1;
 
                                 if(diferencia1>0 && diferencia1<8){
-                                        for(int i=x2-1; i>=x1;i--){
+                                        for(int i=x2-1; i>x1;i--){
                                                 if(tablero[y1][i]!=NULL){
                                                          cont_piezas++;
                                                 }
@@ -327,7 +430,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
 	
                                 }else{
                                         if(diferencia2>0 &&diferencia2<8){
-                                                for(int i=x1+1; i<=x2;i++){
+                                                for(int i=x1+1; i<x2;i++){
                                                         if(tablero[y1][i]!=NULL){
                                                                  cont_piezas++;
                                                         }
@@ -350,7 +453,7 @@ bool puede_mover(char actual ,int x1,int y1,int x2,int y2,int jugador,pieza*** t
                 int diferenciay2=y2-y1;
 		int diferenciax1=x1-x2;
                 int diferenciax2=x2-x1;
-		
+		if(diferenciay1==diferenciax1 || diferenciay1==diferenciax2 ||diferenciay2==diferenciax1 || diferenciay2==diferenciax2)
 		if(diferenciay1>0 && diferenciay1<8){
 			if(diferenciax1>0 && diferenciax1<8){
 				int desplazamientox=x1-1,desplazamientoy=y1-1;
@@ -608,11 +711,4 @@ void imprimirTablero(pieza*** tablero){
 	}
 
 }
-
-
-
-
-
-
-
 
