@@ -1,7 +1,12 @@
 #include<iostream>
 #include<ncurses.h>
+#include<fstream>
+#include<string>
 #include "pieza.h"
-
+using std::string;
+using std:: ofstream;
+using std::endl;
+using std::ifstream;
 void imprimirTablero(pieza***);
 int convertir(int,char);
 bool validar_piezas_seleccionadas(int,int,int,int,pieza***,int);
@@ -9,6 +14,7 @@ char identificar_pieza(pieza*);
 bool puede_mover(char,int,int,int,int,int,pieza***);
 bool puede_comer(char,int,int,int,int,int,pieza***);
 char graduacion_peon(char[],int);
+int mate(pieza***);
 int main(int argc, char* argv[]){
 	initscr();
 	start_color();
@@ -45,7 +51,7 @@ int main(int argc, char* argv[]){
 		mvprintw(move_this_y_1,(width/3) -1,"1.-) Jugar");
 		attroff(COLOR_PAIR(3));
 		attron(COLOR_PAIR(1));
-		mvprintw(move_this_y_1+2,(width/3) -1,"3.-) Salir.");
+		mvprintw(move_this_y_1+2,(width/3) -1,"2.-) Salir.");
 		attroff(COLOR_PAIR(1));
 
 		attroff(A_BOLD);
@@ -91,6 +97,9 @@ int main(int argc, char* argv[]){
 				attroff(COLOR_PAIR(2));
 
 				attron(COLOR_PAIR(3));
+				mvprintw(0, 0 ,"ESC=SALIR DEL JUEGO");
+				mvprintw(1, 0 ,"S=SALVAR EL JUEGO");
+				mvprintw(2, 0 ,"Z=CARGAR EL JUEGO");
 				mvprintw(height-1, 0 ,"By: Felix Maldonado ");
 				mvprintw((height/2-1)-6, (width/3 -1 )+2 ,"UTILIZAR SOLO MAYUSCULAS");
 				mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"INGRESE EL COMANDO PARA MOVER: ");
@@ -119,17 +128,81 @@ int main(int argc, char* argv[]){
 						final_cadena = true;
 						comando[comando_cont] = '\0';
 					}
+					if(temp==27){
+						clear();
+						mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"GRACIAS POR UTILIZAR EL PROGRAMA");
+						terminar_juego=true;
+						break;
+					}
+					if(temp==83 || temp==115){
+						echo();
+						ofstream archivo;
+						char name[50];
+						mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"NOMBRE DE LA PARTIDA QUE GUARDARA?: ");
+						getstr(name);
+						archivo.open(name);
+						for(int i=0;i<8;i++){
+							for(int j=0;j<8;j++){
+								if(tablero[i][j]!=NULL){
+						     archivo<<i<<j<< tablero[i][j]->getTipo()<<tablero[i][j]->getJugador();
+									
+								}
+							}
+						
+						}
+						archivo<<'x';
+						archivo.close();	
+						attron(COLOR_PAIR(3));
+						mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"INGRESE EL COMANDO PARA MOVER:                        ");
+						move((height/2-1)-4, (width/3 -1 )+32);
+						attroff(COLOR_PAIR(3));
+						attron(COLOR_PAIR(2));
+					}
+					if(temp==90 || temp==122){
+						echo();
+                                                char name[50];
+						char partida[150];
+                                                mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"NOMBRE DE LA PARTIDA QUE CARGARA?: ");
+                                                getstr(name);
+						ifstream archivo(name);
+						archivo.getline(partida,sizeof(partida)); 
+						
+						archivo.close();
+						for(int i=0;i<8;i++){
+							for(int j=0;j<8;j++){
+								tablero[i][j]=NULL;
+							}
+						}
+						int contador=0;//posicion de partida
+						while(partida[contador] !='x'){
+							int partidax= partida[contador] - '0', partiday= partida[contador+1] - '0',
+							partida_jugador= partida[contador+3]-'0';
+							
+							tablero[partidax][partiday]= new pieza(partida[contador+2],partida_jugador,true);
+							contador+=4;
+						}
+						attron(COLOR_PAIR(5));
+						imprimirTablero(tablero);
+						attroff(COLOR_PAIR(3));
+						attron(COLOR_PAIR(3)); 
+                                                mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"INGRESE EL COMANDO PARA MOVER:                        ");
+                                                move((height/2-1)-4, (width/3 -1 )+32);
+                                                attroff(COLOR_PAIR(3));
+                                                attron(COLOR_PAIR(2));
+
+					}
+					
 				}
-				
 				getch();
 				attroff(COLOR_PAIR(2));
 				int mover_x1,mover_y1, mover_x2, mover_y2;
-			
-				mover_x1 = convertir(mover_x1,comando[0]);
-				mover_y1 = convertir(mover_y1,comando[1]);
-				mover_x2 = convertir(mover_x2,comando[2]);
-                        	mover_y2 = convertir(mover_y2,comando[3]);
 				
+				if(comando[0]!='\0'){
+					mover_x1 = convertir(mover_x1,comando[0]);
+					mover_y1 = convertir(mover_y1,comando[1]);
+					mover_x2 = convertir(mover_x2,comando[2]);
+                        		mover_y2 = convertir(mover_y2,comando[3]);
+				}
 			
 				if(validar_piezas_seleccionadas(mover_x1,mover_y1,mover_x2,mover_y2,tablero,bandera)){
 					char pieza_seleccionada = identificar_pieza(tablero[mover_y1][mover_x1]);
@@ -163,6 +236,7 @@ int main(int argc, char* argv[]){
 										}
                                                                         }
 								}
+							
 							}
 						}else{
 						    mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
@@ -174,7 +248,7 @@ int main(int argc, char* argv[]){
 							
 						}
 					}else{
-						if(puede_comer(pieza_seleccionada,mover_x1,mover_y1,mover_x2, mover_y2,bandera,tablero)){
+						if(puede_comer(pieza_seleccionada,mover_x1,mover_y1,mover_x2,mover_y2,bandera,tablero)){
 							if(bandera==1){
 								tablero[mover_y2][mover_x2]->setJugador(bandera);
 								tablero[mover_y2][mover_x2]->setTipo(tablero[mover_y1][mover_x1]->getTipo());
@@ -210,9 +284,7 @@ int main(int argc, char* argv[]){
 										}
                                                                         }
                                                                 }
-
 							}
-							
 						}else{
 						    mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
                                                         getch();
@@ -224,8 +296,8 @@ int main(int argc, char* argv[]){
 						}
 					}	
 				}else{
-					mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
-					getch();
+						mvprintw((height/2-1)-4, (width/3 -1 )+2 ,"EL MOVIMIENTO NO ES VALIDO!!! INTENTA CON OTRO");
+						getch();
 					if(bandera==1)
                                         	bandera++;
                                 	else
@@ -256,6 +328,7 @@ int main(int argc, char* argv[]){
 							
 		}else{
 			if(opc==50){
+				clear();
 				mvprintw(move_this_y_1-1,(width/3) -1,"GRACIAS POR UTILIZAR EL PROGRAMA TE ESPERAMOS PRONTO");
 				terminar=true;
 			}
@@ -275,6 +348,10 @@ int main(int argc, char* argv[]){
 	
 
 	return 0;
+}
+	
+int mate(pieza*** tablero){
+
 }
 char graduacion_peon(char piezas_comidas[],int jugador){
 	clear();
